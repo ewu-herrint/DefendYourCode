@@ -1,3 +1,6 @@
+// The Incredible Inchworms
+// Tyler Herrin, Chris Purta, Casey Schadewitz
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -5,8 +8,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.InputMismatchException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class DefendYourCode 
@@ -39,7 +47,7 @@ public class DefendYourCode
 		
 		File out = new File (makeOutFile()); //No reason to let user specify output file.
 		
-		//TODO Get password here.
+		passwordCheck(in);
 		
 		writeToOut(out, fname, lname, intOne, intTwo, inputFile);
 		
@@ -47,9 +55,66 @@ public class DefendYourCode
 	}
 	
 
-	private static boolean checkMultiplication(int intOne, int intTwo) {
-		// TODO Auto-generated method stub
-		return false;
+	private static void passwordCheck(Scanner in) 
+	{
+		System.out.print("Enter a password: ");
+		
+		try 
+		{
+			String pass = in.nextLine();
+			
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			byte[] hashOne = digest.digest(pass.getBytes("UTF-8"));
+			
+			System.out.print("Enter the password again: ");
+			String auth = in.nextLine();
+			
+			byte[] hashTwo = digest.digest(auth.getBytes("UTF-8"));
+			
+			if(Arrays.equals(hashOne, hashTwo))
+				System.out.println("Password accepted.");
+			else
+				System.out.println("Passwords did not match.");
+		} 
+		catch(NoSuchElementException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NoSuchAlgorithmException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (UnsupportedEncodingException e) 
+		{
+			e.printStackTrace();
+		}
+		
+	}
+
+
+	private static boolean checkMultiplication(int intOne, int intTwo) 
+	{
+		int smaller, larger;
+		
+		if(Math.abs(intOne) < Math.abs(intTwo))
+		{
+			smaller = Math.abs(intOne);
+			larger = Math.abs(intTwo);
+		}
+		else
+		{	
+			smaller = Math.abs(intTwo);	
+			larger = Math.abs(intOne);
+		}
+		
+		/* If the max integer size divided by the smaller integer is greater than the 
+		 * larger integer divided by the smaller integer then larger multiplied by smaller
+		 * must be less than the max int size.
+		 */
+		if(Integer.MAX_VALUE / smaller >= larger / smaller)
+			return true;
+		else
+			return false;
 	}
 
 
@@ -74,18 +139,14 @@ public class DefendYourCode
 				String filename = in.nextLine();
 				File file = new File(filename);
 				
-				if(filename.contains("\\"))
+				if(!filename.matches("^[a-zA-Z0-9][\\w]*\\.?[\\w]*[a-zA-Z0-9]+$"))
 				{
-					System.out.println("Invalid file name. Do not give a path, Just a file name in the working directory.");
+					System.out.println("Invalid file name. Make sure the file is in the working directory.");
 				}
 				else if(file.exists() && file.isFile())
 					return file;
 				else
-					System.out.println("Invalid input file.");
-			}
-			catch(NullPointerException e)
-			{
-				System.out.println("Invalid input file.");
+					System.out.println("File does not exist.");
 			}
 			catch(Exception e)
 			{
@@ -101,7 +162,6 @@ public class DefendYourCode
 		{
 			int add = intOne + intTwo;
 			int multiply = intOne * intTwo; 
-			// Check values before and after.
 			
 			FileWriter fw = new FileWriter(out.getAbsolutePath());
 			BufferedWriter bw = new BufferedWriter(fw);
@@ -194,7 +254,6 @@ public class DefendYourCode
 		}
 	}
 
-
 	private static String getName(String s, Scanner in) 
 	{
 		while(true)
@@ -215,7 +274,7 @@ public class DefendYourCode
 					System.out.println("Invalid name entry.");
 				}
 			}
-			catch(Exception e) //See if we can find any errors
+			catch(Exception e)
 			{
 				e.printStackTrace();
 			}
