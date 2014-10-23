@@ -34,13 +34,16 @@ public class DefendYourCode
 		
 		int intOne = 0;
 		int intTwo = 0;
-		while(!(safeadd && safemult))
+		while(!(safeadd && safemult)) //If either safeadd or safemult are false keep looping.s
 		{
-			intOne = getInts("a", in);
+			intOne = getInts("an", in);
 			intTwo = getInts("another", in);
 			
 			safeadd = checkAddition(intOne, intTwo);
 			safemult = checkMultiplication(intOne, intTwo);
+			
+			if((!safemult) || (!safeadd))
+				System.out.println("Invalid integers entered.");
 		}
 		
 		File inputFile = getInFile(in);
@@ -96,6 +99,9 @@ public class DefendYourCode
 	{
 		int smaller, larger;
 		
+		if(intOne == 0 || intTwo == 0)
+			return true;
+		
 		if(Math.abs(intOne) < Math.abs(intTwo))
 		{
 			smaller = Math.abs(intOne);
@@ -111,16 +117,16 @@ public class DefendYourCode
 		 * larger integer divided by the smaller integer then larger multiplied by smaller
 		 * must be less than the max int size.
 		 */
-		if(Integer.MAX_VALUE / smaller >= larger / smaller)
-			return true;
-		else
-			return false;
+		return ((Integer.MAX_VALUE / larger) > smaller);
+			
 	}
 
 
 	private static boolean checkAddition(int intOne, int intTwo) 
 	{
-		if(intOne > 0 && intTwo > 0 && intOne+intTwo > 0)
+		if(intOne == 0 || intTwo == 0)
+			return true;
+		else if(intOne > 0 && intTwo > 0 && intOne+intTwo > 0)
 			return true;
 		else if(intOne < 0 && intTwo < 0 && intOne+intTwo < 0)
 			return true;

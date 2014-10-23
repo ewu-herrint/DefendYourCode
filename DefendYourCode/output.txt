@@ -1,6 +1,6 @@
-Tyler Herrin
-Addition: 1012214122
-Multiplication: 502140565
+T H
+Addition: 1
+Multiplication: 0
 
 This is my input file.
 This is a second line.
