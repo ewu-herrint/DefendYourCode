@@ -67,10 +67,19 @@ public class DefendYourCode
 		
 		writeToOut(out, fname, lname, intOne, intTwo, inputFile, log);
 		
+		try 
+		{
+			log.close();
+		} 
+		catch (IOException e) 
+		{
+			System.out.println("Log file could not close.");
+		}
 		in.close();
 	}
 	
 
+	
 	private static void passwordCheck(Scanner in, BufferedWriter log) 
 	{
 		System.out.print("Enter a password: ");
@@ -349,7 +358,7 @@ public class DefendYourCode
 	}
 
 	private static String getName(String s, Scanner in, BufferedWriter log) 
-	{
+	{	
 		while(true)
 		{
 			System.out.printf("Enter your %s name: ", s);
