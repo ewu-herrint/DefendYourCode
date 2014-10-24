@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.regex.PatternSyntaxException;
 
 public class DefendYourCode 
 {
@@ -24,11 +25,23 @@ public class DefendYourCode
 	{
 		Scanner in = new Scanner(System.in);
 		
+		FileWriter fw = null;
+		BufferedWriter log = null;
+		try 
+		{
+			fw = new FileWriter("log.txt");
+			log = new BufferedWriter(fw);
+		} 
+		catch (IOException e) 
+		{
+			System.out.println("Could not create log file.");
+		}
+		
 		String fname = null;
 		String lname = null;
 		
-		fname = getName("first", in);
-		lname = getName("last", in);
+		fname = getName("first", in, log);
+		lname = getName("last", in, log);
 		
 		boolean safeadd = false, safemult = false;
 		
@@ -36,8 +49,8 @@ public class DefendYourCode
 		int intTwo = 0;
 		while(!(safeadd && safemult)) //If either safeadd or safemult are false keep looping.s
 		{
-			intOne = getInts("an", in);
-			intTwo = getInts("another", in);
+			intOne = getInts("an", in, log);
+			intTwo = getInts("another", in, log);
 			
 			safeadd = checkAddition(intOne, intTwo);
 			safemult = checkMultiplication(intOne, intTwo);
@@ -46,19 +59,19 @@ public class DefendYourCode
 				System.out.println("Invalid integers entered.");
 		}
 		
-		File inputFile = getInFile(in);
+		File inputFile = getInFile(in, log);
 		
-		File out = new File (makeOutFile()); //No reason to let user specify output file.
+		File out = new File (makeOutFile(log)); //No reason to let user specify output file.
 		
-		passwordCheck(in);
+		passwordCheck(in, log);
 		
-		writeToOut(out, fname, lname, intOne, intTwo, inputFile);
+		writeToOut(out, fname, lname, intOne, intTwo, inputFile, log);
 		
 		in.close();
 	}
 	
 
-	private static void passwordCheck(Scanner in) 
+	private static void passwordCheck(Scanner in, BufferedWriter log) 
 	{
 		System.out.print("Enter a password: ");
 		
@@ -79,19 +92,32 @@ public class DefendYourCode
 			else
 				System.out.println("Passwords did not match.");
 		} 
-		catch(NoSuchElementException e)
-		{
-			e.printStackTrace();
-		}
 		catch (NoSuchAlgorithmException e) 
 		{
-			e.printStackTrace();
-		} 
+			System.out.println("Encryption error occured.");
+			try 
+			{
+				log.write("Encryption error occured.");
+				log.newLine();
+			}
+			catch(IOException f)
+			{
+				System.out.println("Could not write error to log file.");
+			}
+		}
 		catch (UnsupportedEncodingException e) 
 		{
-			e.printStackTrace();
+			System.out.println("Encoding error occured.");
+			try 
+			{
+				log.write("Encoding error occured.");
+				log.newLine();
+			}
+			catch(IOException f)
+			{
+				System.out.println("Could not write error to log file.");
+			}
 		}
-		
 	}
 
 
@@ -135,7 +161,7 @@ public class DefendYourCode
 	}
 
 
-	private static File getInFile(Scanner in) 
+	private static File getInFile(Scanner in, BufferedWriter log) 
 	{
 		while(true)
 		{
@@ -154,15 +180,24 @@ public class DefendYourCode
 				else
 					System.out.println("File does not exist.");
 			}
-			catch(Exception e)
+			catch(NullPointerException e)
 			{
-				e.printStackTrace();
+				System.out.println("Null pathname error occurred.");
+				try 
+				{
+					log.write("Null pathname error occured.");
+					log.newLine();
+				}
+				catch(IOException f)
+				{
+					System.out.println("Could not write error to log file.");
+				}
 			}
 		}
 	}
 
 
-	private static void writeToOut(File out, String fname, String lname, int intOne, int intTwo, File inputFile) 
+	private static void writeToOut(File out, String fname, String lname, int intOne, int intTwo, File inputFile, BufferedWriter log) 
 	{
 		try
 		{
@@ -199,16 +234,20 @@ public class DefendYourCode
 		catch(IOException e)
 		{
 			System.out.println("Could not write to output.txt");
+			try 
+			{
+				log.write("Could not write to output.txt.");
+				log.newLine();
+			}
+			catch(IOException f)
+			{
+				System.out.println("Could not write error to log file.");
+			}
 		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		
 	}
 
 
-	private static String makeOutFile() 
+	private static String makeOutFile(BufferedWriter log) 
 	{
 		Writer writer = null;
 
@@ -219,6 +258,15 @@ public class DefendYourCode
 		catch (IOException e)
 		{
 			System.out.println("Could not create output.txt");
+			try 
+			{
+				log.write("Could not create output.txt");
+				log.newLine();
+			}
+			catch(IOException f)
+			{
+				System.out.println("Could not write error to log file.");
+			}
 		} 
 		finally 
 		{
@@ -226,16 +274,25 @@ public class DefendYourCode
 			{
 				writer.close();
 			} 
-			catch (Exception e) 
+			catch (IOException e) 
 			{
-				e.printStackTrace();
+				System.out.println("Could not close output file.");
+				try 
+				{
+					log.write("Could not close output file.");
+					log.newLine();
+				}
+				catch(IOException f)
+				{
+					System.out.println("Could not write error to log file.");
+				}
 			}
 		}
 		return "output.txt";
 	}
 
 
-	private static int getInts(String s, Scanner in) 
+	private static int getInts(String s, Scanner in, BufferedWriter log) 
 	{
 		while(true)
 		{
@@ -248,10 +305,41 @@ public class DefendYourCode
 			catch(InputMismatchException e)
 			{
 				System.out.println("Invalid integer entry.");
+				try 
+				{
+					log.write("Invalid Integer entry.");
+					log.newLine();
+				}
+				catch(IOException f)
+				{
+					System.out.println("Could not write error to log file.");
+				}
 			}
-			catch(Exception e)
+			catch(NoSuchElementException e)
 			{
-				e.printStackTrace();
+				System.out.println("Input error.");
+				try 
+				{
+					log.write("Input exausted in getInts.");
+					log.newLine();
+				}
+				catch(IOException f)
+				{
+					System.out.println("Could not write error to log file.");
+				}
+			}
+			catch(IllegalStateException e)
+			{
+				System.out.println("Scanner error occured.");
+				try 
+				{
+					log.write("Scanner input was exausted somehow in getInts.");
+					log.newLine();
+				}
+				catch(IOException f)
+				{
+					System.out.println("Could not write error to log file.");
+				}
 			}
 			finally
 			{
@@ -260,7 +348,7 @@ public class DefendYourCode
 		}
 	}
 
-	private static String getName(String s, Scanner in) 
+	private static String getName(String s, Scanner in, BufferedWriter log) 
 	{
 		while(true)
 		{
@@ -280,9 +368,44 @@ public class DefendYourCode
 					System.out.println("Invalid name entry.");
 				}
 			}
-			catch(Exception e)
+			catch(PatternSyntaxException e)
 			{
-				e.printStackTrace();
+				System.out.println("Regex pattern error occured.");
+				try 
+				{
+					log.write("Regex pattern was changed somehow in getName");
+					log.newLine();
+				}
+				catch(IOException f)
+				{
+					System.out.println("Could not write error to log file.");
+				}
+			}
+			catch(NoSuchElementException e)
+			{
+				System.out.println("No line was found.");
+				try 
+				{
+					log.write("No line found in getName.");
+					log.newLine();
+				}
+				catch(IOException f)
+				{
+					System.out.println("Could not write error to log file.");
+				}
+			}
+			catch(IllegalStateException e)
+			{
+				System.out.println("Scanner error has occured.");
+				try 
+				{
+					log.write("Scanner has been closed somehow.");
+					log.newLine();
+				}
+				catch(IOException f)
+				{
+					System.out.println("Could not write error to log file.");
+				}
 			}
 			
 		}
